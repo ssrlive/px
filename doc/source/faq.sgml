@@ -8,7 +8,7 @@
 <!entity history SYSTEM "history.sgml">
 <!entity copyright SYSTEM "copyright.sgml">
 <!entity license SYSTEM "license.sgml">
-<!entity p-version "3.0.28">
+<!entity p-version "3.0.29">
 <!entity p-status "stable">
 <!entity % p-not-stable "IGNORE">
 <!entity % p-stable "INCLUDE">
@@ -25,7 +25,7 @@
 
  Purpose     :  FAQ
 
- Copyright (C) 2001-2018 Privoxy Developers https://www.privoxy.org/
+ Copyright (C) 2001-2020 Privoxy Developers https://www.privoxy.org/
  See LICENSE.
 
  Based partially on the Internet Junkbuster FAQ originally written by and
@@ -69,7 +69,7 @@
  <subscript>
 <!-- Completely the wrong markup, but very little is allowed  -->
 <!-- in this part of an article. FIXME -->
- <link linkend="copyright">Copyright</link> &my-copy; 2001-2018 by
+ <link linkend="copyright">Copyright</link> &my-copy; 2001-2020 by
  <ulink url="https://www.privoxy.org/">Privoxy Developers</ulink>
  </subscript>
 </pubdate>
@@ -115,10 +115,6 @@ Hal.
  <ulink url="https://www.privoxy.org/">Privoxy</ulink>.
  It is not a substitute for the
  <ulink url="../user-manual/index.html"><citetitle>Privoxy User Manual</citetitle></ulink>.
-<!--
- This works, at least in some situtations:
- Test: <ulink url="privoxy-user-manual.pdf"><citetitle>User Manual</citetitle></ulink>.
--->
  </para>
 
 <!-- Include privoxy.sgml boilerplate: -->
@@ -513,31 +509,6 @@ warranty? Registration?</title>
 </para>
 
 <para>
- You can also donate to Privoxy using a bank account or a "Paypal" address:
-</para>
-<literallayout>
- Name on account: <ulink url="https://www.zwiebelfreunde.de/">Zwiebelfreunde e.V.</ulink>
- IBAN: DE95430609671126825604
- BIC: GENODEM1GLS
- Bank: GLS Bank
-</literallayout>
-<literallayout>
- "Paypal" address: privoxy@zwiebelfreunde.de
-</literallayout>
-<para>
- Donations made through Zwiebelfreunde e.V. are tax-deductible in Germany
- and other countries that recognize German charitable clubs. Feel free to
- use the Subject field to provide a name to be credited and a list of TODO
- list items you are interested in the most. For example: Max Mustermann: #16, #1, #14.
-</para>
-
-<para>
- Note that donations made through Zwiebelfreunde e.V. currently can't be checked
- automatically so you may not get credited right away. The credits currently
- reflect donations received before 2016-01-14.
-</para>
-
-<para>
  If you have any questions regarding donations please mail to either the
  public user mailing list or, if it's a private matter, to
  <ulink url="mailto:fk@fabiankeil.de">Fabian Keil</ulink> (Privoxy's SPI liaison)
@@ -551,10 +522,10 @@ warranty? Registration?</title>
 </para>
 <variablelist>
  <varlistentry>
-  <term>Gold (10000 EUR/year)</term>
+  <term>Gold (12000 USD/year)</term>
   <listitem>
    <para>
-    Logo shown at the bottom of the
+    Logo or text link shown at the bottom of the
     <ulink url="https://www.privoxy.org/">Privoxy homepage</ulink>.
     Logo, link and self description on the
     <ulink url="https://www.privoxy.org/sponsors/">sponsor page</ulink>.
@@ -562,10 +533,10 @@ warranty? Registration?</title>
   </listitem>
  </varlistentry>
  <varlistentry>
-  <term>Silver (1000 EUR/year)</term>
+  <term>Silver (1200 USD/year)</term>
   <listitem>
    <para>
-    Logo shown randomly at the bottom of the
+    Logo or text link shown at the bottom of the
     <ulink url="https://www.privoxy.org/">Privoxy homepage</ulink>.
     Logo, link and self description on the
     <ulink url="https://www.privoxy.org/sponsors/">sponsor page</ulink>.
@@ -573,7 +544,7 @@ warranty? Registration?</title>
   </listitem>
  </varlistentry>
  <varlistentry>
-  <term>Bronze (500 EUR/year)</term>
+  <term>Bronze (600 USD/year)</term>
   <listitem>
    <para>
     Logo and link on the <ulink url="https://www.privoxy.org/sponsors/">sponsor page</ulink>.
@@ -1341,7 +1312,8 @@ and thus avoid individual browser configuration?</title>
  amount of guesswork. It is not realistic to catch all of these short of
  disabling Javascript, which would break many sites. And lastly, if the
  cookies are embedded in a HTTPS/SSL secure session via Javascript, they are beyond
- <application>Privoxy's</application> reach.
+ <application>Privoxy's</application> reach unless you enable
+ <ulink url="../user-manual/actions-file.html#HTTPS-INSPECTION">https-inspection</ulink>.
 </para>
 <para>
  All in all, &my-app; can help manage cookies in general, can help minimize
@@ -1996,9 +1968,17 @@ ads used to be. Why?</title>
 <sect2 renderas="sect3" id="ssl">
 <title>How can Privoxy filter Secure (HTTPS) URLs?</title>
 <para>
- Since secure HTTP connections are encrypted SSL sessions between your browser
- and the secure site, and are meant to be reliably <emphasis>secure</emphasis>,
- there is little that <application>Privoxy</application> can do but hand the raw
+ If you enable
+ <ulink url="../user-manual/actions-file.html#HTTPS-INSPECTION">https-inspection</ulink>
+ <application>Privoxy</application> will impersonate the destination
+ server and can thus filter encrypted requests and responses as well.
+</para>
+<para>
+ Without
+ <ulink url="../user-manual/actions-file.html#HTTPS-INSPECTION">https-inspection</ulink>
+ secure HTTP connections are encrypted SSL sessions between your
+ browser and the secure site, and there is little
+ that <application>Privoxy</application> can do but hand the raw
  gibberish data though from one end to the other unprocessed.
 </para>
 <para>
@@ -2034,8 +2014,9 @@ ads used to be. Why?</title>
   for HTTPS.
 </para>
 <para>
-  Adding HTTP/2 support is on the TODO list but currently
-  nobody is known to work on it.
+  Adding HTTP/2 support is on the
+  <ulink url="https://www.privoxy.org/gitweb/?p=privoxy.git;a=blob_plain;f=TODO;hb=HEAD">TODO</ulink>
+  list but currently nobody is known to work on it.
 </para>
 </sect2>
 
@@ -2999,7 +2980,7 @@ browsing has slowed to a crawl. What gives? </title>
  this is not considered a Privoxy bug.
 </para>
 <para>
- To prevent the crashes you can rewrite your filter to use less ressources,
+ To prevent the crashes you can rewrite your filter to use less resources,
  increase the relevant memory limit or recompile pcre to use less stack space.
  For details please see the
  <ulink url="http://pcre.org/original/doc/html/pcrestack.html">pcrestack man page</ulink>

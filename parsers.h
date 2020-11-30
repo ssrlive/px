@@ -12,11 +12,11 @@
  *                   `client_x_forwarded_adder', `client_xtra_adder',
  *                   `content_type', `crumble', `destroy_list', `enlist',
  *                   `flush_socket', `free_http_request', `get_header',
- *                   `list_to_text', `parse_http_request', `sed',
+ *                   `parse_http_request', `sed',
  *                   and `server_set_cookie'.
  *
  * Copyright   :  Written by and Copyright (C) 2001 members of the
- *                Privoxy team. http://www.privoxy.org/
+ *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and
@@ -56,9 +56,15 @@ extern jb_err decompress_iob(struct client_state *csp);
 extern char *get_header(struct iob *iob);
 extern char *get_header_value(const struct list *header_list, const char *header_name);
 extern jb_err sed(struct client_state *csp, int filter_server_headers);
+#ifdef FEATURE_HTTPS_INSPECTION
+extern jb_err sed_https(struct client_state *csp);
+#endif
 extern jb_err update_server_headers(struct client_state *csp);
 extern void get_http_time(int time_offset, char *buf, size_t buffer_size);
 extern jb_err get_destination_from_headers(const struct list *headers, struct http_request *http);
+#ifdef FEATURE_HTTPS_INSPECTION
+extern jb_err get_destination_from_https_headers(const struct list *headers, struct http_request *http);
+#endif
 extern unsigned long long get_expected_content_length(struct list *headers);
 extern jb_err client_transfer_encoding(struct client_state *csp, char **header);
 

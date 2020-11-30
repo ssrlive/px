@@ -13,7 +13,7 @@
  *                    DEFINE_ACTION_ALIAS
  *
  * Copyright   :  Written by and Copyright (C) 2001-2014 the
- *                Privoxy team. http://www.privoxy.org/
+ *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and
@@ -107,6 +107,10 @@ DEFINE_CGI_PARAM_RADIO   ("hide-referrer",              ACTION_HIDE_REFERER,    
 DEFINE_CGI_PARAM_CUSTOM  ("hide-referrer",              ACTION_HIDE_REFERER,    ACTION_STRING_REFERER,       "http://www.privoxy.org/")
 DEFINE_ACTION_STRING     ("hide-user-agent",            ACTION_HIDE_USER_AGENT, ACTION_STRING_USER_AGENT)
 DEFINE_CGI_PARAM_NO_RADIO("hide-user-agent",            ACTION_HIDE_USER_AGENT, ACTION_STRING_USER_AGENT,    "Privoxy " VERSION)
+#ifdef FEATURE_HTTPS_INSPECTION
+DEFINE_ACTION_BOOL       ("https-inspection",           ACTION_HTTPS_INSPECTION)
+DEFINE_ACTION_BOOL       ("ignore-certificate-errors",  ACTION_IGNORE_CERTIFICATE_ERRORS)
+#endif
 DEFINE_ACTION_STRING     ("limit-connect",              ACTION_LIMIT_CONNECT,   ACTION_STRING_LIMIT_CONNECT)
 DEFINE_CGI_PARAM_NO_RADIO("limit-connect",              ACTION_LIMIT_CONNECT,   ACTION_STRING_LIMIT_CONNECT,  "443")
 DEFINE_ACTION_STRING     ("limit-cookie-lifetime",      ACTION_LIMIT_COOKIE_LIFETIME, ACTION_STRING_LIMIT_COOKIE_LIFETIME)

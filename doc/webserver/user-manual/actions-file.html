@@ -4,7 +4,7 @@
 <head>
   <title>Actions Files</title>
   <meta name="GENERATOR" content="Modular DocBook HTML Stylesheet Version 1.79">
-  <link rel="HOME" title="Privoxy 3.0.28 User Manual" href="index.html">
+  <link rel="HOME" title="Privoxy 3.0.29 User Manual" href="index.html">
   <link rel="PREVIOUS" title="The Main Configuration File" href="config.html">
   <link rel="NEXT" title="Filter Files" href="filter-file.html">
   <link rel="STYLESHEET" type="text/css" href="../p_doc.css">
@@ -15,7 +15,7 @@
   <div class="NAVHEADER">
     <table summary="Header navigation table" width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>
-        <th colspan="3" align="center">Privoxy 3.0.28 User Manual</th>
+        <th colspan="3" align="center">Privoxy 3.0.29 User Manual</th>
       </tr>
       <tr>
         <td width="10%" align="left" valign="bottom"><a href="config.html" accesskey="P">Prev</a></td>
@@ -73,7 +73,7 @@
         <p>The default profiles, and their associated actions, as pre-defined in <tt class=
         "FILENAME">default.action</tt> are:</p>
         <div class="TABLE">
-          <a name="AEN2866" id="AEN2866"></a>
+          <a name="AEN3180" id="AEN3180"></a>
           <p><b>Table 1. Default Configurations</b></p>
           <table border="1" frame="border" rules="all" class="CALSTABLE">
             <col width="1*" title="C1">
@@ -394,6 +394,9 @@
           </dl>
         </div>
         <p>While flexible, this is not the sophistication of full regular expression based syntax.</p>
+        <p>When compiled with FEATURE_PCRE_HOST_PATTERNS patterns can be prefixed with <span class=
+        "QUOTE">"PCRE-HOST-PATTERN:"</span> in which case full regular expression (PCRE) can be used for the host
+        pattern as well.</p>
       </div>
       <div class="SECT3">
         <h3 class="SECT3"><a name="PATH-PATTERN" id="PATH-PATTERN">8.4.2. The Path Pattern</a></h3>
@@ -1524,7 +1527,7 @@ problem-host.example.com</pre>
               <p>To detect a redirection URL, <tt class="LITERAL">fast-redirects</tt> only looks for the string
               <span class="QUOTE">"http://"</span>, either in plain text (invalid but often used) or encoded as
               <span class="QUOTE">"http%3a//"</span>. Some sites use their own URL encoding scheme, encrypt the address
-              of the target server or replace it with a database id. In theses cases <tt class=
+              of the target server or replace it with a database id. In these cases <tt class=
               "LITERAL">fast-redirects</tt> is fooled and the request reaches the redirection server where it probably
               gets logged.</p>
             </dd>
@@ -2499,7 +2502,101 @@ nasty-banner-server.example.com/junk.cgi\?output=trash</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="LIMIT-CONNECT" id="LIMIT-CONNECT">8.5.28. limit-connect</a></h4>
+        <h4 class="SECT3"><a name="HTTPS-INSPECTION" id="HTTPS-INSPECTION">8.5.28. https-inspection</a></h4>
+        <div class="VARIABLELIST">
+          <dl>
+            <dt>Typical use:</dt>
+            <dd>
+              <p>Filter encrypted requests and responses</p>
+            </dd>
+            <dt>Effect:</dt>
+            <dd>
+              <p>Encrypted requests are decrypted, filtered and forwarded encrypted.</p>
+            </dd>
+            <dt>Type:</dt>
+            <dd>
+              <p>Boolean.</p>
+            </dd>
+            <dt>Parameter:</dt>
+            <dd>
+              <p>N/A</p>
+            </dd>
+            <dt>Notes:</dt>
+            <dd>
+              <p>This action allows <span class="APPLICATION">Privoxy</span> to filter encrypted requests and
+              responses. For this to work <span class="APPLICATION">Privoxy</span> has to generate a certificate and
+              send it to the client which has to accept it.</p>
+              <p>Before this works the directives in the <tt class="LITERAL"><a href=
+              "config.html#HTTPS-INSPECTION-DIRECTIVES" target="_top">HTTPS inspection section</a></tt> of the config
+              file have to be configured.</p>
+              <p>Note that the action has to be enabled based on the CONNECT request which doesn't contain a path.
+              Enabling it based on a pattern with path doesn't work as the path is only seen by <span class=
+              "APPLICATION">Privoxy</span> if the action is already enabled.</p>
+              <p>This is an experimental feature.</p>
+            </dd>
+            <dt>Example usage (section):</dt>
+            <dd>
+              <table border="0" bgcolor="#E0E0E0" width="90%">
+                <tr>
+                  <td>
+                    <pre class="SCREEN">{+https-inspection}
+www.example.com</pre>
+                  </td>
+                </tr>
+              </table>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      <div class="SECT3">
+        <h4 class="SECT3"><a name="IGNORE-CERTIFICATE-ERRORS" id="IGNORE-CERTIFICATE-ERRORS">8.5.29.
+        ignore-certificate-errors</a></h4>
+        <div class="VARIABLELIST">
+          <dl>
+            <dt>Typical use:</dt>
+            <dd>
+              <p>Filter encrypted requests and responses without verifying the certificate</p>
+            </dd>
+            <dt>Effect:</dt>
+            <dd>
+              <p>Encrypted requests are forwarded to sites without verifying the certificate.</p>
+            </dd>
+            <dt>Type:</dt>
+            <dd>
+              <p>Boolean.</p>
+            </dd>
+            <dt>Parameter:</dt>
+            <dd>
+              <p>N/A</p>
+            </dd>
+            <dt>Notes:</dt>
+            <dd>
+              <p>When the <a href="actions-file.html#HTTPS-INSPECTION"><span class=
+              "QUOTE">"+https-inspection"</span></a> action is used <span class="APPLICATION">Privoxy</span> by default
+              verifies that the remote site uses a valid certificate.</p>
+              <p>If the certificate can't be validated by <span class="APPLICATION">Privoxy</span> the connection is
+              aborted.</p>
+              <p>This action disables the certificate check so requests to sites with certificates that can't be
+              validated are allowed.</p>
+              <p>Note that enabling this action allows Man-in-the-middle attacks.</p>
+            </dd>
+            <dt>Example usage:</dt>
+            <dd>
+              <table border="0" bgcolor="#E0E0E0" width="90%">
+                <tr>
+                  <td>
+                    <pre class="SCREEN">    {+ignore-certificate-errors}
+    www.example.org
+   </pre>
+                  </td>
+                </tr>
+              </table>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      <div class="SECT3">
+        <h4 class="SECT3"><a name="LIMIT-CONNECT" id="LIMIT-CONNECT">8.5.30. limit-connect</a></h4>
         <div class="VARIABLELIST">
           <dl>
             <dt>Typical use:</dt>
@@ -2551,7 +2648,7 @@ nasty-banner-server.example.com/junk.cgi\?output=trash</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="LIMIT-COOKIE-LIFETIME" id="LIMIT-COOKIE-LIFETIME">8.5.29.
+        <h4 class="SECT3"><a name="LIMIT-COOKIE-LIFETIME" id="LIMIT-COOKIE-LIFETIME">8.5.31.
         limit-cookie-lifetime</a></h4>
         <div class="VARIABLELIST">
           <dl>
@@ -2603,7 +2700,7 @@ nasty-banner-server.example.com/junk.cgi\?output=trash</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="PREVENT-COMPRESSION" id="PREVENT-COMPRESSION">8.5.30. prevent-compression</a></h4>
+        <h4 class="SECT3"><a name="PREVENT-COMPRESSION" id="PREVENT-COMPRESSION">8.5.32. prevent-compression</a></h4>
         <div class="VARIABLELIST">
           <dl>
             <dt>Typical use:</dt>
@@ -2641,8 +2738,9 @@ nasty-banner-server.example.com/junk.cgi\?output=trash</pre>
               action settings.</p>
               <p>Note that some (rare) ill-configured sites don't handle requests for uncompressed documents correctly.
               Broken PHP applications tend to send an empty document body, some IIS versions only send the beginning of
-              the content. If you enable <tt class="LITERAL">prevent-compression</tt> per default, you might want to
-              add exceptions for those sites. See the example for how to do that.</p>
+              the content and some content delivery networks let the connection time out. If you enable <tt class=
+              "LITERAL">prevent-compression</tt> per default, you might want to add exceptions for those sites. See the
+              example for how to do that.</p>
             </dd>
             <dt>Example usage (sections):</dt>
             <dd>
@@ -2674,7 +2772,7 @@ nasty-banner-server.example.com/junk.cgi\?output=trash</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="OVERWRITE-LAST-MODIFIED" id="OVERWRITE-LAST-MODIFIED">8.5.31.
+        <h4 class="SECT3"><a name="OVERWRITE-LAST-MODIFIED" id="OVERWRITE-LAST-MODIFIED">8.5.33.
         overwrite-last-modified</a></h4>
         <div class="VARIABLELIST">
           <dl>
@@ -2736,7 +2834,7 @@ nasty-banner-server.example.com/junk.cgi\?output=trash</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="REDIRECT" id="REDIRECT">8.5.32. redirect</a></h4>
+        <h4 class="SECT3"><a name="REDIRECT" id="REDIRECT">8.5.34. redirect</a></h4>
         <div class="VARIABLELIST">
           <dl>
             <dt>Typical use:</dt>
@@ -2828,7 +2926,7 @@ www.privoxy.org/user-manual/</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="SERVER-HEADER-FILTER" id="SERVER-HEADER-FILTER">8.5.33.
+        <h4 class="SECT3"><a name="SERVER-HEADER-FILTER" id="SERVER-HEADER-FILTER">8.5.35.
         server-header-filter</a></h4>
         <div class="VARIABLELIST">
           <dl>
@@ -2878,7 +2976,7 @@ example.org/instance-that-is-delivered-as-xml-but-is-not</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="SERVER-HEADER-TAGGER" id="SERVER-HEADER-TAGGER">8.5.34.
+        <h4 class="SECT3"><a name="SERVER-HEADER-TAGGER" id="SERVER-HEADER-TAGGER">8.5.36.
         server-header-tagger</a></h4>
         <div class="VARIABLELIST">
           <dl>
@@ -2935,7 +3033,7 @@ TAG:^image/</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="SESSION-COOKIES-ONLY" id="SESSION-COOKIES-ONLY">8.5.35.
+        <h4 class="SECT3"><a name="SESSION-COOKIES-ONLY" id="SESSION-COOKIES-ONLY">8.5.37.
         session-cookies-only</a></h4>
         <div class="VARIABLELIST">
           <dl>
@@ -2997,7 +3095,7 @@ TAG:^image/</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h4 class="SECT3"><a name="SET-IMAGE-BLOCKER" id="SET-IMAGE-BLOCKER">8.5.36. set-image-blocker</a></h4>
+        <h4 class="SECT3"><a name="SET-IMAGE-BLOCKER" id="SET-IMAGE-BLOCKER">8.5.38. set-image-blocker</a></h4>
         <div class="VARIABLELIST">
           <dl>
             <dt>Typical use:</dt>
@@ -3086,7 +3184,7 @@ TAG:^image/</pre>
         </div>
       </div>
       <div class="SECT3">
-        <h3 class="SECT3"><a name="SUMMARY" id="SUMMARY">8.5.37. Summary</a></h3>
+        <h3 class="SECT3"><a name="SUMMARY" id="SUMMARY">8.5.39. Summary</a></h3>
         <p>Note that many of these actions have the potential to cause a page to misbehave, possibly even not to
         display at all. There are many ways a site designer may choose to design his site, and what HTTP header
         content, and other criteria, he may depend on. There is no way to have hard and fast rules for all sites. See

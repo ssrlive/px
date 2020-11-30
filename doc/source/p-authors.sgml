@@ -3,7 +3,7 @@
 
  Purpose     :  Entity included in other project documents.
 
- Copyright (C) 2001-2018 Privoxy Developers https://www.privoxy.org/
+ Copyright (C) 2001-2019 Privoxy Developers https://www.privoxy.org/
  See LICENSE.
 
  ======================================================================
@@ -77,6 +77,7 @@ Current Privoxy Team:
 <literallayout>
  Rustam Abdullaev
  Clint Adams
+ Maxim Antonov
  Anatoly Arzhnikov
  Ken Arromdee
  Natxo Asenjo
@@ -121,6 +122,8 @@ Current Privoxy Team:
  Magnus Holmgren
  Eric M. Hopper
  Ralf Horstmann
+ Ho+ Ho+ Ho+
+ Ned&zcaron;ad Hrnjica
  Stefan Huehner
  Basil Hussain
  Peter Hyman
@@ -153,6 +156,7 @@ Current Privoxy Team:
  Amuro Namie
  Mark Nelson
  Tobias Netzel
+ John Palkovic
  Adam Piggott
  Petr P&iacute;sar
  Dan Price
@@ -162,16 +166,20 @@ Current Privoxy Team:
  Marvin Renich
  Chris John Riley
  Maynard Riley
+ Ivan Romanov
  Andreas Rutkauskas
+ Sam
  Bart Schelstraete
  Gregory Seidman
  Atman Sense
  Chung-chieh Shan
  Johan Sintorn
  Benjamin C. Wiley Sittler
+ DRS David Soft
  Simon South
  Dan Stahlke
  Oliver Stoeneberg
+ V&aacute;clav &Scaron;vec
  Rick Sykes
  Spinor S.
  Peter Thoenen
@@ -188,6 +196,7 @@ Current Privoxy Team:
  J&ouml;rg Weinmann
  Darren Wiebe
  Anduin Withers
+ withoutname
  Eduard Wulff
  Yang Xia
  Jarry Xu
@@ -211,9 +220,7 @@ Current Privoxy Team:
 </para>
 
 <para>
- On systems that lack snprintf(), Privoxy is using a version
- written by Mark Martinec. On systems that lack strptime(),
- Privoxy is using the one from the GNU C Library written
- by Ulrich Drepper.
+ On systems that lack strptime(), Privoxy is using the one from the
+ GNU C Library written by Ulrich Drepper.
 </para>
 ]]>

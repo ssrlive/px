@@ -43,6 +43,7 @@ include (in alphabetical order):
 
  Rustam Abdullaev
  Clint Adams
+ Maxim Antonov
  Anatoly Arzhnikov
  Ken Arromdee
  Natxo Asenjo
@@ -87,6 +88,8 @@ include (in alphabetical order):
  Magnus Holmgren
  Eric M. Hopper
  Ralf Horstmann
+ Ho+ Ho+ Ho+
+ Nedžad Hrnjica
  Stefan Huehner
  Basil Hussain
  Peter Hyman
@@ -119,6 +122,7 @@ include (in alphabetical order):
  Amuro Namie
  Mark Nelson
  Tobias Netzel
+ John Palkovic
  Adam Piggott
  Petr Písar
  Dan Price
@@ -128,16 +132,20 @@ include (in alphabetical order):
  Marvin Renich
  Chris John Riley
  Maynard Riley
+ Ivan Romanov
  Andreas Rutkauskas
+ Sam
  Bart Schelstraete
  Gregory Seidman
  Atman Sense
  Chung-chieh Shan
  Johan Sintorn
  Benjamin C. Wiley Sittler
+ DRS David Soft
  Simon South
  Dan Stahlke
  Oliver Stoeneberg
+ Václav Švec
  Rick Sykes
  Spinor S.
  Peter Thoenen
@@ -154,6 +162,7 @@ include (in alphabetical order):
  Jörg Weinmann
  Darren Wiebe
  Anduin Withers
+ withoutname
  Eduard Wulff
  Yang Xia
  Jarry Xu
@@ -169,9 +178,8 @@ Privoxy heavily relies on Philip Hazel's PCRE.
 The code to filter compressed content makes use of zlib which is written by
 Jean-loup Gailly and Mark Adler.
 
-On systems that lack snprintf(), Privoxy is using a version written by Mark
-Martinec. On systems that lack strptime(), Privoxy is using the one from the
-GNU C Library written by Ulrich Drepper.
+On systems that lack strptime(), Privoxy is using the one from the GNU C
+Library written by Ulrich Drepper.
 
 If we've missed you off this list, please let us know!
 

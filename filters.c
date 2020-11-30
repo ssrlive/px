@@ -4,8 +4,8 @@
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2016 the
- *                Privoxy team. http://www.privoxy.org/
+ * Copyright   :  Written by and Copyright (C) 2001-2020 the
+ *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and
@@ -42,17 +42,11 @@
 #include <assert.h>
 
 #ifndef _WIN32
-#ifndef __OS2__
 #include <unistd.h>
-#endif /* ndef __OS2__ */
 #include <netinet/in.h>
 #else
 #include <winsock2.h>
 #endif /* ndef _WIN32 */
-
-#ifdef __OS2__
-#include <utils.h>
-#endif /* def __OS2__ */
 
 #include "project.h"
 #include "filters.h"
@@ -86,6 +80,10 @@ static void apply_url_actions(struct current_action_spec *action,
                               const struct list *client_tags,
 #endif
                               struct url_actions *b);
+
+#ifdef FEATURE_EXTENDED_STATISTICS
+static void increment_block_reason_counter(const char *block_reason);
+#endif
 
 #ifdef FEATURE_ACL
 #ifdef HAVE_RFC2553
@@ -206,7 +204,7 @@ static int match_sockaddr(const struct sockaddr_storage *network,
       return 0;
    }
 
-   /* TODO: Optimize by checking by words insted of octets */
+   /* TODO: Optimize by checking by words instead of octets */
    for (i = 0; (i < addr_len) && netmask_addr[i]; i++)
    {
       if ((network_addr[i] & netmask_addr[i]) !=
@@ -505,7 +503,7 @@ int acl_addr(const char *aspec, struct access_control_addr *aca)
  *
  * Description :  Check to see if CONNECT requests to the destination
  *                port of this request are forbidden. The check is
- *                independend of the actual request method.
+ *                independent of the actual request method.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -556,6 +554,13 @@ struct http_response *block_url(struct client_state *csp)
    {
       return cgi_error_memory();
    }
+
+#ifdef FEATURE_EXTENDED_STATISTICS
+   if (csp->action->string[ACTION_STRING_BLOCK] != NULL)
+   {
+      increment_block_reason_counter(csp->action->string[ACTION_STRING_BLOCK]);
+   }
+#endif
 
    /*
     * If it's an image-url, send back an image or redirect
@@ -1039,7 +1044,7 @@ char *rewrite_url(char *old_url, const char *pcrs_command)
  *                the last URL found.
  *
  *********************************************************************/
-char *get_last_url(char *subject, const char *redirect_mode)
+static char *get_last_url(char *subject, const char *redirect_mode)
 {
    char *new_url = NULL;
    char *tmp;
@@ -1652,9 +1657,11 @@ static char *pcrs_filter_response(struct client_state *csp)
       if (b->dynamic) pcrs_free_joblist(joblist);
 
       log_error(LOG_LEVEL_RE_FILTER,
-         "filtering %s%s (size %d) with \'%s\' produced %d hits (new size %d).",
+         "filtering %s%s (size %lu) with \'%s\' produced %d hits (new size %lu).",
          csp->http->hostport, csp->http->path, prev_size, b->name, current_hits, size);
-
+#ifdef FEATURE_EXTENDED_STATISTICS
+      update_filter_statistics(b->name, current_hits);
+#endif
       hits += current_hits;
    }
 
@@ -1664,6 +1671,10 @@ static char *pcrs_filter_response(struct client_state *csp)
     */
    if (!hits)
    {
+      if (old != csp->iob->cur && old != new)
+      {
+         freez(old);
+      }
       freez(new);
       return(NULL);
    }
@@ -1816,7 +1827,7 @@ static char *execute_external_filter(const struct client_state *csp,
     */
    if ((*size != 0) && fwrite(content, *size, 1, fp) != 1)
    {
-      log_error(LOG_LEVEL_ERROR, "fwrite(..., %d, 1, ..) failed: %E", *size);
+      log_error(LOG_LEVEL_ERROR, "fwrite(..., %lu, 1, ..) failed: %E", *size);
       unlink(file_name);
       fclose(fp);
       return NULL;
@@ -1892,7 +1903,7 @@ static char *execute_external_filter(const struct client_state *csp,
    {
       log_error(LOG_LEVEL_RE_FILTER,
          "Executing '%s' resulted in return value %d. "
-         "Read %d of up to %d bytes.", name, (ret >> 8), new_size, *size);
+         "Read %lu of up to %lu bytes.", name, (ret >> 8), new_size, *size);
    }
 
    unlink(file_name);
@@ -1952,7 +1963,8 @@ static char *gif_deanimate_response(struct client_state *csp)
       }
       else
       {
-         log_error(LOG_LEVEL_DEANIMATE, "Success! GIF shrunk from %d bytes to %d.", size, out->offset);
+         log_error(LOG_LEVEL_DEANIMATE,
+            "Success! GIF shrunk from %lu bytes to %lu.", size, out->offset);
       }
       csp->content_length = out->offset;
       csp->flags |= CSP_FLAG_MODIFIED;
@@ -2058,8 +2070,8 @@ static jb_err remove_chunked_transfer_coding(char *buffer, size_t *size)
       {
          log_error(LOG_LEVEL_ERROR,
             "Chunk size %u exceeds buffered data left. "
-            "Already digested %u of %u buffered bytes.",
-            chunksize, (unsigned int)newsize, (unsigned int)*size);
+            "Already digested %lu of %lu buffered bytes.",
+            chunksize, newsize, *size);
          return JB_ERR_PARSE;
       }
 
@@ -2113,7 +2125,8 @@ static jb_err remove_chunked_transfer_coding(char *buffer, size_t *size)
    }
 
    /* XXX: Should get its own loglevel. */
-   log_error(LOG_LEVEL_RE_FILTER, "De-chunking successful. Shrunk from %d to %d", *size, newsize);
+   log_error(LOG_LEVEL_RE_FILTER,
+      "De-chunking successful. Shrunk from %lu to %lu", *size, newsize);
 
    *size = newsize;
 
@@ -2166,7 +2179,11 @@ static jb_err prepare_for_filtering(struct client_state *csp)
     * If the body has a supported transfer-encoding,
     * decompress it, adjusting size and iob->eod.
     */
-   if (csp->content_type & (CT_GZIP|CT_DEFLATE))
+   if ((csp->content_type & (CT_GZIP|CT_DEFLATE))
+#ifdef FEATURE_BROTLI
+      || (csp->content_type & CT_BROTLI)
+#endif
+       )
    {
       if (0 == csp->iob->eod - csp->iob->cur)
       {
@@ -2184,11 +2201,14 @@ static jb_err prepare_for_filtering(struct client_state *csp)
       else
       {
          /*
-          * Unset CT_GZIP and CT_DEFLATE to remember not
-          * to modify the Content-Encoding header later.
+          * Unset content types to remember not to
+          * modify the Content-Encoding header later.
           */
          csp->content_type &= ~CT_GZIP;
          csp->content_type &= ~CT_DEFLATE;
+#ifdef FEATURE_BROTLI
+         csp->content_type &= ~CT_BROTLI;
+#endif
       }
    }
 #endif
@@ -2466,10 +2486,11 @@ static const struct forward_spec *get_forward_override_settings(struct client_st
 
       if (NULL != socks_proxy)
       {
-         /* Parse the SOCKS proxy host[:port] */
+         /* Parse the SOCKS proxy [user:pass@]host[:port] */
          fwd->gateway_port = 1080;
          parse_forwarder_address(socks_proxy,
-            &fwd->gateway_host, &fwd->gateway_port);
+            &fwd->gateway_host, &fwd->gateway_port,
+            &fwd->auth_username, &fwd->auth_password);
 
          http_parent = vec[2];
       }
@@ -2487,7 +2508,8 @@ static const struct forward_spec *get_forward_override_settings(struct client_st
    {
       fwd->forward_port = 8000;
       parse_forwarder_address(http_parent,
-         &fwd->forward_host, &fwd->forward_port);
+         &fwd->forward_host, &fwd->forward_port,
+         NULL, NULL);
    }
 
    assert (NULL != fwd);
@@ -2653,7 +2675,7 @@ int content_requires_filtering(struct client_state *csp)
        * The server didn't bother to declare a MIME-Type.
        * Assume it's text that can be filtered.
        *
-       * This also regulary happens with 304 responses,
+       * This also regularly happens with 304 responses,
        * therefore logging anything here would cause
        * too much noise.
        */
@@ -2728,6 +2750,283 @@ int filters_available(const struct client_state *csp)
    return FALSE;
 }
 
+#ifdef FEATURE_EXTENDED_STATISTICS
+
+struct filter_statistics_entry
+{
+   char *filter;
+   unsigned long long executions;
+   unsigned long long response_bodies_modified;
+   unsigned long long hits;
+
+   struct filter_statistics_entry *next;
+};
+
+static struct filter_statistics_entry *filter_statistics = NULL;
+
+
+/*********************************************************************
+ *
+ * Function    :  register_filter_for_statistics
+ *
+ * Description :  Registers a filter so we can gather statistics for
+ *                it unless the filter has already been registered
+ *                before.
+ *
+ * Parameters  :
+ *          1  :  filter = Name of the filter to register
+ *
+ * Returns     :  void
+ *
+ *********************************************************************/
+void register_filter_for_statistics(const char *filter)
+{
+   struct filter_statistics_entry *entry;
+
+   privoxy_mutex_lock(&filter_statistics_mutex);
+
+   if (filter_statistics == NULL)
+   {
+      filter_statistics = zalloc_or_die(sizeof(struct filter_statistics_entry));
+      entry = filter_statistics;
+      entry->filter = strdup_or_die(filter);
+      privoxy_mutex_unlock(&filter_statistics_mutex);
+      return;
+   }
+   entry = filter_statistics;
+   while (entry != NULL)
+   {
+      if (!strcmp(entry->filter, filter))
+      {
+         /* Already registered, nothing to do. */
+         break;
+      }
+      if (entry->next == NULL)
+      {
+         entry->next = zalloc_or_die(sizeof(struct filter_statistics_entry));
+         entry->next->filter = strdup_or_die(filter);
+         break;
+      }
+      entry = entry->next;
+   }
+
+   privoxy_mutex_unlock(&filter_statistics_mutex);
+
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  update_filter_statistics
+ *
+ * Description :  Updates the statistics for a filter.
+ *
+ * Parameters  :
+ *          1  :  filter = Name of the filter to update
+ *          2  :  hits = Hit count.
+ *
+ * Returns     :  void
+ *
+ *********************************************************************/
+void update_filter_statistics(const char *filter, int hits)
+{
+   struct filter_statistics_entry *entry;
+
+   privoxy_mutex_lock(&filter_statistics_mutex);
+
+   entry = filter_statistics;
+   while (entry != NULL)
+   {
+      if (!strcmp(entry->filter, filter))
+      {
+         entry->executions++;
+         if (hits != 0)
+         {
+            entry->response_bodies_modified++;
+            entry->hits += (unsigned)hits;
+         }
+         break;
+      }
+      entry = entry->next;
+   }
+
+   privoxy_mutex_unlock(&filter_statistics_mutex);
+
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  get_filter_statistics
+ *
+ * Description :  Gets the statistics for a filter.
+ *
+ * Parameters  :
+ *          1  :  filter = Name of the filter to get statistics for.
+ *          2  :  executions = Storage for the execution count.
+ *          3  :  response_bodies_modified = Storage for the number
+ *                of modified response bodies.
+ *          4  :  hits = Storage for the number of hits.
+ *
+ * Returns     :  void
+ *
+ *********************************************************************/
+void get_filter_statistics(const char *filter, unsigned long long *executions,
+                           unsigned long long *response_bodies_modified,
+                           unsigned long long *hits)
+{
+   struct filter_statistics_entry *entry;
+
+   privoxy_mutex_lock(&filter_statistics_mutex);
+
+   entry = filter_statistics;
+   while (entry != NULL)
+   {
+      if (!strcmp(entry->filter, filter))
+      {
+         *executions = entry->executions;
+         *response_bodies_modified = entry->response_bodies_modified;
+         *hits = entry->hits;
+         break;
+      }
+      entry = entry->next;
+   }
+
+   privoxy_mutex_unlock(&filter_statistics_mutex);
+
+}
+
+
+struct block_statistics_entry
+{
+   char *block_reason;
+   unsigned long long count;
+
+   struct block_statistics_entry *next;
+};
+
+static struct block_statistics_entry *block_statistics = NULL;
+
+/*********************************************************************
+ *
+ * Function    :  register_block_reason_for_statistics
+ *
+ * Description :  Registers a block reason so we can gather statistics
+ *                for it unless the block reason has already been
+ *                registered before.
+ *
+ * Parameters  :
+ *          1  :  block_reason = Block reason to register
+ *
+ * Returns     :  void
+ *
+ *********************************************************************/
+void register_block_reason_for_statistics(const char *block_reason)
+{
+   struct block_statistics_entry *entry;
+
+   privoxy_mutex_lock(&block_statistics_mutex);
+
+   if (block_statistics == NULL)
+   {
+      block_statistics = zalloc_or_die(sizeof(struct block_statistics_entry));
+      entry = block_statistics;
+      entry->block_reason = strdup_or_die(block_reason);
+      privoxy_mutex_unlock(&block_statistics_mutex);
+      return;
+   }
+   entry = block_statistics;
+   while (entry != NULL)
+   {
+      if (!strcmp(entry->block_reason, block_reason))
+      {
+         /* Already registered, nothing to do. */
+         break;
+      }
+      if (entry->next == NULL)
+      {
+         entry->next = zalloc_or_die(sizeof(struct block_statistics_entry));
+         entry->next->block_reason = strdup_or_die(block_reason);
+         break;
+      }
+      entry = entry->next;
+   }
+
+   privoxy_mutex_unlock(&block_statistics_mutex);
+
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  increment_block_reason_counter
+ *
+ * Description :  Updates the counter for a block reason.
+ *
+ * Parameters  :
+ *          1  :  block_reason = Block reason to count
+ *
+ * Returns     :  void
+ *
+ *********************************************************************/
+static void increment_block_reason_counter(const char *block_reason)
+{
+   struct block_statistics_entry *entry;
+
+   privoxy_mutex_lock(&block_statistics_mutex);
+
+   entry = block_statistics;
+   while (entry != NULL)
+   {
+      if (!strcmp(entry->block_reason, block_reason))
+      {
+         entry->count++;
+         break;
+      }
+      entry = entry->next;
+   }
+
+   privoxy_mutex_unlock(&block_statistics_mutex);
+
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  get_block_reason_count
+ *
+ * Description :  Gets number of times a block reason was used.
+ *
+ * Parameters  :
+ *          1  :  block_reason = Block reason to get statistics for.
+ *          2  :  count = Storage for the number of times the block
+ *                        reason was used.
+ *
+ * Returns     :  void
+ *
+ *********************************************************************/
+void get_block_reason_count(const char *block_reason, unsigned long long *count)
+{
+   struct block_statistics_entry *entry;
+
+   privoxy_mutex_lock(&block_statistics_mutex);
+
+   entry = block_statistics;
+   while (entry != NULL)
+   {
+      if (!strcmp(entry->block_reason, block_reason))
+      {
+         *count = entry->count;
+         break;
+      }
+      entry = entry->next;
+   }
+
+   privoxy_mutex_unlock(&block_statistics_mutex);
+
+}
+
+#endif /* def FEATURE_EXTENDED_STATISTICS */
 
 /*
   Local Variables:

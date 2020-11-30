@@ -13,7 +13,7 @@
  *                Stick to the short names in this file for consistency.
  *
  * Copyright   :  Written by and Copyright (C) 2001-2014 the
- *                Privoxy team. http://www.privoxy.org/
+ *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and
@@ -1100,7 +1100,7 @@ jb_err edit_parse_actions_file(struct editable_file * file)
 
    /* alias_list contains the aliases defined in this file.
     * It might be better to use the "file_line.data" fields
-    * in the relavent places instead.
+    * in the relevant places instead.
     */
 
    cur_line = file->lines;
@@ -2750,7 +2750,7 @@ jb_err cgi_edit_actions_for_url(struct client_state *csp,
     * browsers (BR #1570678).
     *
     * The config option split-large-forms works around this browser
-    * bug (HTTP has no URL length limitation) by deviding the action
+    * bug (HTTP has no URL length limitation) by dividing the action
     * list form into multiple smaller ones. It means the URLs are shorter
     * and work in broken browsers as well, but the user can no longer change
     * all actions with one submit.
@@ -2781,6 +2781,9 @@ jb_err cgi_edit_actions_for_url(struct client_state *csp,
 
 #ifndef FEATURE_EXTERNAL_FILTERS
    if (!err) err = map_block_killer(exports, "external-content-filters");
+#endif
+#ifndef FEATURE_HTTPS_INSPECTION
+   if (!err) err = map_block_killer(exports, "https-inspection");
 #endif
 
    if (err)
@@ -2939,6 +2942,51 @@ jb_err cgi_edit_actions_for_url(struct client_state *csp,
 
 /*********************************************************************
  *
+ * Function    :  get_number_of_filters
+ *
+ * Description :  Counts the number of filter available.
+ *
+ * Parameters  :
+ *          1  :  csp = Current client state (buffers, headers, etc...)
+ *
+ * Returns     :  Number of filters available.
+ *
+ *********************************************************************/
+static int get_number_of_filters(const struct client_state *csp)
+{
+   int i;
+   struct re_filterfile_spec *b;
+   struct file_list *fl;
+   int number_of_filters = 0;
+
+   for (i = 0; i < MAX_AF_FILES; i++)
+   {
+     fl = csp->rlist[i];
+     if ((NULL == fl) || (NULL == fl->f))
+     {
+        /*
+         * Either there are no filter files left or this
+         * filter file just contains no valid filters.
+         *
+         * Continue to be sure we don't miss valid filter
+         * files that are chained after empty or invalid ones.
+         */
+        continue;
+     }
+
+     for (b = fl->f; b != NULL; b = b->next)
+     {
+        number_of_filters++;
+     }
+   }
+
+   return number_of_filters;
+
+}
+
+
+/*********************************************************************
+ *
  * Function    :  cgi_edit_actions_submit
  *
  * Description :  CGI function that actually edits the Actions list.
@@ -2975,6 +3023,7 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
    const char * action_set_name;
    struct file_list * fl;
    struct url_actions * b;
+   int number_of_filters;
 
    if (0 == (csp->config->feature_flags & RUNTIME_FEATURE_CGI_EDIT_ACTIONS))
    {
@@ -3063,7 +3112,9 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
       }
    }
 
-   for (filter_identifier = 0; !err; filter_identifier++)
+   number_of_filters = get_number_of_filters(csp);
+
+   for (filter_identifier = 0; filter_identifier < number_of_filters && !err; filter_identifier++)
    {
       char key_value[30];
       char key_name[30];
@@ -3092,8 +3143,8 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
 
       if (name == NULL)
       {
-         /* End of list */
-         break;
+         /* The filter identifier isn't present. Try the next one. */
+         continue;
       }
 
       type = get_char_param(parameters, key_type);
@@ -3193,8 +3244,8 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
       return err;
    }
 
-   snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%i#l%u",
-            (long) time(NULL), file->identifier, sectionid);
+   snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%u#l%u",
+            (unsigned long) time(NULL), file->identifier, sectionid);
 
    edit_free_file(file);
 
@@ -3314,8 +3365,8 @@ jb_err cgi_edit_actions_url(struct client_state *csp,
       return err;
    }
 
-   snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%i#l%u",
-            (long) time(NULL), file->identifier, section_start_line_number);
+   snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%u#l%u",
+            (unsigned long) time(NULL), file->identifier, section_start_line_number);
 
    edit_free_file(file);
 
@@ -3437,8 +3488,8 @@ jb_err cgi_edit_actions_add_url(struct client_state *csp,
       return err;
    }
 
-   snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%i#l%u",
-            (long) time(NULL), file->identifier, sectionid);
+   snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%u#l%u",
+            (unsigned long) time(NULL), file->identifier, sectionid);
 
    edit_free_file(file);
 
@@ -3549,7 +3600,7 @@ jb_err cgi_edit_actions_remove_url(struct client_state *csp,
    }
 
    snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%u#l%u",
-            (long) time(NULL), file->identifier, section_start_line_number);
+            (unsigned long) time(NULL), file->identifier, section_start_line_number);
 
    edit_free_file(file);
 
@@ -3671,7 +3722,7 @@ jb_err cgi_edit_actions_section_remove(struct client_state *csp,
    }
 
    snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%u",
-            (long) time(NULL), file->identifier);
+            (unsigned long) time(NULL), file->identifier);
 
    edit_free_file(file);
 
@@ -3834,7 +3885,7 @@ jb_err cgi_edit_actions_section_add(struct client_state *csp,
    }
 
    snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%u",
-            (long) time(NULL), file->identifier);
+            (unsigned long) time(NULL), file->identifier);
 
    edit_free_file(file);
 
@@ -4023,7 +4074,7 @@ jb_err cgi_edit_actions_section_swap(struct client_state *csp,
    } /* END if (section1 != section2) */
 
    snprintf(target, sizeof(target), CGI_PREFIX "edit-actions-list?foo=%lu&f=%u",
-            (long) time(NULL), file->identifier);
+            (unsigned long) time(NULL), file->identifier);
 
    edit_free_file(file);
 

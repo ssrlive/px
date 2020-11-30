@@ -4,7 +4,7 @@
  *
  * Purpose     :  README file to give a short intro.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2018 the
+ * Copyright   :  Written by and Copyright (C) 2001-2020 the
  *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
@@ -32,7 +32,7 @@
  *
  *********************************************************************/
 
-This README is included with Privoxy 3.0.28. See https://www.privoxy.org/ for
+This README is included with Privoxy 3.0.29. See https://www.privoxy.org/ for
 more information. The current code maturity level is "stable".
 
 -------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ flexible configuration and can be customized to suit individual needs and
 tastes. It has application for both stand-alone systems and multi-user
 networks.
 
-Privoxy is Free Software and licensed under the GNU GPLv2.
+Privoxy is Free Software and licensed under the GNU GPLv2 or later.
 
 Privoxy is an associated project of Software in the Public Interest (SPI).
 

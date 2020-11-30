@@ -5,7 +5,7 @@
  * Purpose     :  Declares functions to work with actions files
  *
  * Copyright   :  Written by and Copyright (C) 2001-2016 the
- *                Privoxy team. http://www.privoxy.org/
+ *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and
@@ -547,6 +547,12 @@ jb_err get_actions(char *line,
                         return JB_ERR_PARSE;
                      }
                   }
+#ifdef FEATURE_EXTENDED_STATISTICS
+                  if (0 == strcmpic(action->name, "+block"))
+                  {
+                     register_block_reason_for_statistics(value);
+                  }
+#endif
                   /* FIXME: should validate option string here */
                   freez (cur_action->string[action->index]);
                   cur_action->string[action->index] = strdup(value);
@@ -1826,7 +1832,7 @@ char * actions_to_html(const struct client_state *csp,
  *
  * Function    :  current_actions_to_html
  *
- * Description :  Converts a curren action spec to a <br> separated HTML
+ * Description :  Converts a current action spec to a <br> separated HTML
  *                text in which each action is linked to its chapter in
  *                the user manual.
  *

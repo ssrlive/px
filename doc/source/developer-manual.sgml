@@ -5,7 +5,7 @@
 <!entity p-intro SYSTEM "privoxy.sgml">
 <!entity history SYSTEM "history.sgml">
 <!entity seealso SYSTEM "seealso.sgml">
-<!entity p-version "3.0.28">
+<!entity p-version "3.0.29">
 <!entity p-status "stable">
 <!entity % p-not-stable "IGNORE">
 <!entity % p-stable "INCLUDE">
@@ -19,7 +19,7 @@
 
  Purpose     :  developer manual
 
- Copyright (C) 2001-2018 Privoxy Developers https://www.privoxy.org/
+ Copyright (C) 2001-2020 Privoxy Developers https://www.privoxy.org/
  See LICENSE.
 
  ========================================================================
@@ -39,7 +39,7 @@
     <!-- Completely the wrong markup, but very little is allowed  -->
     <!-- in this part of an article. FIXME -->
       <ulink url="https://www.privoxy.org/user-manual/copyright.html">Copyright</ulink>
-      &my-copy; 2001-2018 by
+      &my-copy; 2001-2020 by
       <ulink url="https://www.privoxy.org/">Privoxy Developers</ulink>
      </subscript>
     </pubdate>
@@ -133,8 +133,8 @@ Hal.
     can be sent to the list for review too.
    </para>
     <para>
-     You will also need to have a git package installed, which will
-     entail having ssh installed as well, in order to access the git repository.
+     You will also need to have a git package installed,
+     in order to access the git repository.
      Having the GNU build tools is also going to be important (particularly,
      autoconf and gmake).
     </para>
@@ -158,10 +158,16 @@ Hal.
     <sect2 id="gitaccess"><title>Access to Git</title>
       <para>
         The project's Git repository is hosted at the
-        <ulink url="https://privoxy.org/">Privoxy site.</ulink>
-        The Git repository URL is
-        <literal>ssh://git@git.privoxy.org:23/git/privoxy.git</literal>,
-        the central repository is called <literal>privoxy</literal>, and the
+        <ulink url="https://privoxy.org/">Privoxy website</ulink>.
+        For Privoxy team members with push privileges the Git repository URL is
+        <literal>ssh://git@git.privoxy.org:23/git/privoxy.git</literal>.
+      </para>
+      <para>
+       Contributors without push privileges can
+       <quote>git clone https://www.privoxy.org/git/privoxy.git</quote>.
+      </para>
+      <para>
+        The central repository is called <literal>privoxy</literal>, and the
         source branch is called <literal>master</literal>. Subfolders exist
         within the project for target-dependent build and  packaging tools, each
         including the name of the target operating system in their name (e.g.
@@ -2272,7 +2278,7 @@ for-privoxy-version=3.0.11
       <listitem>
        <para>
         Tag all files in Git with the version number with
-        <quote><command>cvs tag v_X_Y_Z</command></quote>.
+        <quote><command>git tag v_X_Y_Z</command></quote>.
         Don't use vX_Y_Z, ver_X_Y_Z, v_X.Y.Z (won't work) etc.
        </para>
       </listitem>
@@ -2306,8 +2312,9 @@ for-privoxy-version=3.0.11
       <programlisting>
   mkdir dist # delete or choose different name if it already exists
   cd dist
-  cvs -d:pserver:anonymous@ijbswa.cvs.sourceforge.net:/cvsroot/ijbswa login
-  cvs -z3 -d:pserver:anonymous@ijbswa.cvs.sourceforge.net:/cvsroot/ijbswa export -r v_X_Y_Z current
+  git clone https://www.privoxy.org/git/privoxy.git
+  cd privoxy
+  git checkout v_X_Y_Z
 </programlisting>
 
     <para>
@@ -2526,55 +2533,6 @@ for-privoxy-version=3.0.11
         RPM release number as determined above.
         Go to the displayed URL and release the file publicly on Sourceforge.
         Use the release notes and change log from the source tarball package.
-      </para>
-    </sect3>
-
-    <sect3 id="newrelease-os2"><title>OS/2</title>
-      <para>
-        First, <emphasis>make sure that you have freshly exported the right
-        version into an empty directory</emphasis>. (See "Building and releasing
-        packages" above). Then get the OS/2 Setup module:
-      </para>
-        <programlisting>
-  cvs -z3 -d:pserver:anonymous@ijbswa.cvs.sourceforge.net:/cvsroot/ijbswa co os2setup
-</programlisting>
-      <para>
-        You will need a mix of development tools.
-        The main compilation takes place with IBM Visual Age C++.
-        Some ancillary work takes place with GNU tools, available from
-        various sources like hobbes.nmsu.edu.
-        Specificially, you will need <filename>autoheader</filename>,
-        <filename>autoconf</filename> and <filename>sh</filename> tools.
-        The packaging takes place with WarpIN, available from various sources, including
-        its home page: <ulink url="http://www.xworkplace.org/">xworkplace</ulink>.
-      </para>
-      <para>
-        Change directory to the <filename>os2setup</filename> directory.
-        Edit the os2build.cmd file to set the final executable filename.
-        For example,
-      </para>
-        <programlisting>
-  installExeName='privoxyos2_setup_X.Y.Z.exe'
-</programlisting>
-      <para>
-        Next, edit the <filename>IJB.wis</filename> file so the release number matches
-        in the <filename>PACKAGEID</filename> section:
-      </para>
-        <programlisting>
-  PACKAGEID="Privoxy Team\Privoxy\Privoxy Package\X\Y\Z"
-</programlisting>
-      <para>
-        You're now ready to build.  Run:
-      </para>
-        <programlisting>
-  os2build
-</programlisting>
-      <para>
-         You will find the  WarpIN-installable executable in the
-        <filename>./files</filename> directory. Upload this anonymously to
-         <filename>uploads.sourceforge.net/incoming</filename>, create a release
-         for it, and you're done. Use the release notes and Change Log from the
-         source tarball package.
       </para>
     </sect3>
 

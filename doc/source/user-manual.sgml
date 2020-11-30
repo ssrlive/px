@@ -10,10 +10,11 @@
 <!entity copyright SYSTEM "copyright.sgml">
 <!entity license SYSTEM "license.sgml">
 <!entity GPLv2 SYSTEM "../../LICENSE">
+<!entity GPLv3 SYSTEM "../../LICENSE.GPLv3">
 <!entity p-authors SYSTEM "p-authors.sgml">
 <!entity config SYSTEM "p-config.sgml">
 <!entity changelog SYSTEM "changelog.sgml">
-<!entity p-version "3.0.28">
+<!entity p-version "3.0.29">
 <!entity p-status "stable">
 <!entity % p-authors-formal "INCLUDE"> <!-- include additional text, etc  -->
 <!entity % p-not-stable "IGNORE">
@@ -34,7 +35,7 @@
 
  Purpose     :  user manual
 
- Copyright (C) 2001-2018 Privoxy Developers https://www.privoxy.org/
+ Copyright (C) 2001-2020 Privoxy Developers https://www.privoxy.org/
  See LICENSE.
 
  ========================================================================
@@ -53,7 +54,7 @@
  <subscript>
 <!-- Completely the wrong markup, but very little is allowed  -->
 <!-- in this part of an article. FIXME -->
- <link linkend="copyright">Copyright</link> &my-copy; 2001-2018 by
+ <link linkend="copyright">Copyright</link> &my-copy; 2001-2020 by
  <ulink url="https://www.privoxy.org/">Privoxy Developers</ulink>
  </subscript>
 </pubdate>
@@ -224,31 +225,6 @@ How to install the binary packages depends on your operating system:
  write to its log and configuration files.
 </para>
 
-</sect3>
-
-<!--   ~~~~~       New section      ~~~~~     -->
-<sect3 id="installation-os2"><title>OS/2</title>
-
-<para>
- First, make sure that no previous installations of
- <application>Junkbuster</application> and / or
- <application>Privoxy</application> are left on your
- system. Check that no <application>Junkbuster</application>
- or <application>Privoxy</application> objects are in
- your startup folder.
-</para>
-
-<para>
- Then, just double-click the WarpIN self-installing archive, which will
- guide you through the installation process. A shadow of the
- <application>Privoxy</application> executable will be placed in your
- startup folder so it will start automatically whenever OS/2 starts.
-</para>
-
-<para>
- The directory you choose to install <application>Privoxy</application>
- into will contain all of the configuration files.
-</para>
 </sect3>
 
 <!--   ~~~~~       New section      ~~~~~     -->
@@ -1217,16 +1193,6 @@ Example Unix startup command:
 </para>
 </sect2>
 
-<sect2 id="start-os2">
-<title>OS/2</title>
-<para>
- During installation, <application>Privoxy</application> is configured to
- start automatically when the system restarts. You can start it manually by
- double-clicking on the <application>Privoxy</application> icon in the
- <application>Privoxy</application> folder.
-</para>
-</sect2>
-
 <sect2 id="start-macosx">
 <title>Mac OS X</title>
 <para>
@@ -1517,7 +1483,7 @@ for details.
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&squf;&nbsp;&nbsp;<ulink url="http://config.privoxy.org/show-status">View & change the current configuration</ulink>
  </member>
  <member>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&squf;&nbsp;&nbsp;<ulink url="http://config.privoxy.org/show-version">View the source code version numbers</ulink>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&squf;&nbsp;&nbsp;<ulink url="http://config.privoxy.org/client-tags">View or toggle the tags that can be set based on the client's address</ulink>
  </member>
  <member>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&squf;&nbsp;&nbsp;<ulink url="http://config.privoxy.org/show-request">View the request headers.</ulink>
@@ -1576,7 +1542,7 @@ for details.
 <title>Configuration Files Overview</title>
 <para>
  For Unix, *BSD and GNU/Linux, all configuration files are located in
- <filename>/etc/privoxy/</filename> by default. For MS Windows and OS/2
+ <filename>/etc/privoxy/</filename> by default. For MS Windows
  these are all in the same directory as the
  <application>Privoxy</application> executable. <![%p-not-stable;[ The name
  and number of configuration files has changed from previous versions, and is
@@ -1594,7 +1560,7 @@ for details.
   <listitem>
    <para>
      The <link linkend="config">main configuration file</link> is named <filename>config</filename>
-     on GNU/Linux, Unix, BSD, and OS/2, and <filename>config.txt</filename>
+     on GNU/Linux, Unix, BSD, and <filename>config.txt</filename>
      on Windows. This is a required file.
    </para>
   </listitem>
@@ -2291,6 +2257,12 @@ for details.
 
 <para>
  While flexible, this is not the sophistication of full regular expression based syntax.
+</para>
+
+<para>
+ When compiled with FEATURE_PCRE_HOST_PATTERNS patterns can be prefixed with
+ <quote>PCRE-HOST-PATTERN:</quote> in which case full regular expression
+ (PCRE) can be used for the host pattern as well.
 </para>
 
 </sect3>
@@ -3801,6 +3773,7 @@ problem-host.example.com</screen>
 </variablelist>
 </sect3>
 
+
 <!--   ~~~~~       New section      ~~~~~     -->
 <sect3 renderas="sect4" id="external-filter">
 <title>external-filter</title>
@@ -3986,7 +3959,7 @@ problem-host.example.com</screen>
     looks for the string <quote>http://</quote>, either in plain text
     (invalid but often used) or encoded as <quote>http%3a//</quote>.
     Some sites use their own URL encoding scheme, encrypt the address
-    of the target server or replace it with a database id. In theses cases
+    of the target server or replace it with a database id. In these cases
     <literal>fast-redirects</literal> is fooled and the request reaches the
     redirection server where it probably gets logged.
    </para>
@@ -5147,6 +5120,154 @@ new action
 
 
 <!--   ~~~~~       New section      ~~~~~     -->
+<sect3 renderas="sect4" id="https-inspection">
+<title>https-inspection</title>
+
+<variablelist>
+ <varlistentry>
+  <term>Typical use:</term>
+  <listitem>
+   <para>Filter encrypted requests and responses</para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Effect:</term>
+  <listitem>
+   <para>
+    Encrypted requests are decrypted, filtered and forwarded encrypted.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Type:</term>
+  <!-- boolean, parameterized, Multi-value -->
+  <listitem>
+   <para>Boolean.</para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Parameter:</term>
+  <listitem>
+   <para>
+    N/A
+   </para>
+  </listitem>
+ </varlistentry>
+
+<varlistentry>
+  <term>Notes:</term>
+  <listitem>
+   <para>
+    This action allows &my-app; to filter encrypted requests and responses.
+    For this to work &my-app; has to generate a certificate and send it
+    to the client which has to accept it.
+   </para>
+   <para>
+    Before this works the directives in the
+    <literal><ulink url="config.html#HTTPS-INSPECTION-DIRECTIVES">HTTPS inspection section</ulink></literal>
+    of the config file have to be configured.
+   </para>
+   <para>
+    Note that the action has to be enabled based on the CONNECT
+    request which doesn't contain a path. Enabling it based on
+    a pattern with path doesn't work as the path is only seen
+    by &my-app; if the action is already enabled.
+   </para>
+   <para>
+    This is an experimental feature.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Example usage (section):</term>
+  <listitem>
+     <screen>{+https-inspection}
+www.example.com</screen>
+  </listitem>
+ </varlistentry>
+
+</variablelist>
+</sect3>
+
+
+<!--   ~~~~~       New section      ~~~~~     -->
+<sect3 renderas="sect4" id="ignore-certificate-errors">
+<title>ignore-certificate-errors</title>
+
+<variablelist>
+ <varlistentry>
+  <term>Typical use:</term>
+  <listitem>
+   <para>Filter encrypted requests and responses without verifying the certificate</para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Effect:</term>
+  <listitem>
+   <para>
+    Encrypted requests are forwarded to sites without verifying the certificate.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Type:</term>
+  <!-- Boolean, Parameterized, Multi-value -->
+  <listitem>
+   <para>Boolean.</para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Parameter:</term>
+  <listitem>
+   <para>
+    N/A
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Notes:</term>
+  <listitem>
+   <para>
+    When the
+    <link linkend="HTTPS-INSPECTION"><quote>+https-inspection</quote></link>
+    action is used &my-app; by default verifies that the remote site uses a valid
+    certificate.
+   </para>
+   <para>
+    If the certificate can't be validated by &my-app; the connection is aborted.
+   </para>
+   <para>
+    This action disables the certificate check so requests to sites
+    with certificates that can't be validated are allowed.
+   </para>
+   <para>
+    Note that enabling this action allows Man-in-the-middle attacks.
+   </para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term>Example usage:</term>
+  <listitem>
+   <screen>
+    {+ignore-certificate-errors}
+    www.example.org
+   </screen>
+  </listitem>
+ </varlistentry>
+</variablelist>
+</sect3>
+
+
+<!--   ~~~~~       New section      ~~~~~     -->
 <sect3 renderas="sect4" id="limit-connect">
 <title>limit-connect</title>
 
@@ -5380,9 +5501,10 @@ new action
    <para>
     Note that some (rare) ill-configured sites don't handle requests for uncompressed
     documents correctly. Broken PHP applications tend to send an empty document body,
-    some IIS versions only send the beginning of the content. If you enable
-    <literal>prevent-compression</literal> per default, you might want to add
-    exceptions for those sites. See the example for how to do that.
+    some IIS versions only send the beginning of the content and some content delivery
+    networks let the connection time out.
+    If you enable <literal>prevent-compression</literal> per default, you might
+    want to add exceptions for those sites. See the example for how to do that.
    </para>
   </listitem>
  </varlistentry>
@@ -7330,7 +7452,7 @@ pre-defined filters for your convenience:
     sometimes appear on some pages, or user agents that don't correct for this on
     the fly.
 <!--
-    My version of Mozilla (ancient) shows litte square boxes for quote
+    My version of Mozilla (ancient) shows little square boxes for quote
     characters, and apostrophes on moronized pages. So many pages have this, I
     can read them fine now. HB 08/27/06
 -->
@@ -7721,16 +7843,37 @@ Requests</title>
 
 <para>
  <application>Privoxy</application> is free software; you can
- redistribute it and/or modify it under the terms of the
- <citetitle>GNU General Public License</citetitle>, version 2,
- as published by the Free Software Foundation and included in
- the next section.
+ redistribute and/or modify its source code under the terms
+ of the <citetitle>GNU General Public License</citetitle>
+ as published by the Free Software Foundation, either version 2
+ of the license, or (at your option) any later version.
+</para>
+
+<para>
+ The same is true for <application>Privoxy</application> binaries
+ unless they are linked with a
+ <ulink url="https://tls.mbed.org/">mbed TLS</ulink> version
+ that is licensed under the Apache 2.0 license in which
+ case you can redistribute and/or modify the <application>Privoxy</application>
+ binaries under the terms of the <citetitle>GNU General Public License</citetitle>
+ as published by the Free Software Foundation, either version 3
+ of the license, or (at your option) any later version.
+</para>
+
+<para>
+ Both licenses are included in the next section.
 </para>
 
 <!--   ~~~~~       New section      ~~~~~     -->
 <sect2 id="license"><title>License</title>
 
+<sect3 id="gplv2"><title>GNU General Public License version 2</title>
  <screen><![ RCDATA [ &GPLv2; ]]></screen>
+</sect3>
+
+<sect3 id="gplv3"><title>GNU General Public License version 3</title>
+ <screen><![ RCDATA [ &GPLv3; ]]></screen>
+</sect3>
 
 </sect2>
 <!--  ~  End section  ~  -->
@@ -8041,23 +8184,23 @@ Requests</title>
 
  <listitem>
   <para>
-    Show information about the current configuration, including viewing and
-    editing of actions files:
+    View and toggle client tags:
   </para>
    <blockquote>
    <para>
-    <ulink url="http://config.privoxy.org/show-status">http://config.privoxy.org/show-status</ulink>
+    <ulink url="http://config.privoxy.org/client-tags">http://config.privoxy.org/client-tags</ulink>
    </para>
   </blockquote>
  </listitem>
 
  <listitem>
   <para>
-    Show the source code version numbers:
+    Show information about the current configuration, including viewing and
+    editing of actions files:
   </para>
-  <blockquote>
+   <blockquote>
    <para>
-    <ulink url="http://config.privoxy.org/show-version">http://config.privoxy.org/show-version</ulink>
+    <ulink url="http://config.privoxy.org/show-status">http://config.privoxy.org/show-status</ulink>
    </para>
   </blockquote>
  </listitem>
